@@ -767,21 +767,14 @@
       <div class="qr-toggle-row">
         <div>
           <div class="qr-toggle-label">📊 구글 시트 연동</div>
-          <div class="qr-toggle-sub">출석 데이터를 구글 시트에 자동 저장</div>
+          <div class="qr-toggle-sub">켜면 현재 출석 현황을 시트에 바로 기록</div>
         </div>
         <label class="toggle-switch">
           <input type="checkbox" id="sheets-toggle" onchange="toggleSheets(this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
-      <div class="qr-body" id="sheets-body">
-        <input type="url" class="sheets-url-input" id="gas-url-input"
-               placeholder="Apps Script 웹 앱 URL 붙여넣기..."
-               onchange="saveGasUrl(this.value.trim())">
-        <div class="sheets-status" id="sheets-status"></div>
-        <button class="sheets-sync-btn" onclick="pushSessionToSheet()">📊 날짜별 시트에 기록</button>
-        <button class="sheets-sync-btn" onclick="fullSync()">🔄 전체 데이터 구글 시트에 동기화</button>
-      </div>
+      <div class="sheets-status" id="sheets-status"></div>
     </div>
 
     <div class="search-wrap" id="search-wrap">
@@ -884,7 +877,8 @@
   let selectedMonth = null;
   let qrEnabled = false;
   let sheetsEnabled = false;
-  let gasUrl = '';
+  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwdEJ3tTIB0EbgPK7nDoNn-C6RjCQ2r5P9f41JX7i7NF7RfvOGbQPohisuZezNj0s4H/exec';
+  let gasUrl = GAS_URL;
   let listView = 'present';
 
   const SK = { ROSTER:'att_roster', EVENTS:'att_events', HISTORY:'att_history', CURKEY:'att_curkey', QR:'att_qr', SHEETS:'att_sheets', GAS_URL:'att_gas_url' };
@@ -1068,16 +1062,8 @@
   /* ── 구글 시트 연동 ── */
   function toggleSheets(enabled) {
     sheetsEnabled = enabled;
-    const body = document.getElementById('sheets-body');
-    if (enabled) { body.classList.add('open'); }
-    else { body.classList.remove('open'); }
     saveAll();
-  }
-
-  function saveGasUrl(url) {
-    gasUrl = url;
-    saveAll();
-    if (url) showToast('URL 저장됨');
+    if (enabled) pushSessionToSheet();
   }
 
   function setSheetStatus(type, msg) {
@@ -1166,10 +1152,6 @@
 
   function renderSheets() {
     document.getElementById('sheets-toggle').checked = sheetsEnabled;
-    const body = document.getElementById('sheets-body');
-    if (sheetsEnabled) body.classList.add('open');
-    else body.classList.remove('open');
-    if (gasUrl) document.getElementById('gas-url-input').value = gasUrl;
   }
 
   function toggleAllAttendance() {
